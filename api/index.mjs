@@ -1,25 +1,34 @@
 // Vercel serverless entry: every /api/* request is rewritten here (see vercel.json) and handled by the Express app.
 // The server is compiled to server/dist by `npm run build` before Vercel bundles this function.
-import { createApp } from '../server/dist/app.js';
-import { initDb } from '../server/dist/db/client.js';
+// Everything is loaded lazily so configuration problems come back as a readable JSON error instead of a crash.
 
-const app = createApp();
 let ready = null;
 
+function fail(res, status, error) {
+  res.statusCode = status;
+  res.setHeader('Content-Type', 'application/json');
+  res.end(JSON.stringify({ error }));
+}
+
+async function boot() {
+  const missing = ['JWT_SECRET', 'DATABASE_URL'].filter((k) => !process.env[k]);
+  if (missing.length) throw Object.assign(new Error(`Missing environment variable(s) on Vercel: ${missing.join(', ')}`), { expose: true });
+  const [{ createApp }, { initDb }] = await Promise.all([import('../server/dist/app.js'), import('../server/dist/db/client.js')]);
+  await initDb();
+  return createApp();
+}
+
 export default async function handler(req, res) {
-  // Schema + seed check runs once per warm instance; a failed attempt is retried on the next request.
-  ready ??= initDb().catch((err) => {
+  ready ??= boot().catch((err) => {
     ready = null;
     throw err;
   });
+  let app;
   try {
-    await ready;
+    app = await ready;
   } catch (err) {
-    console.error('[api] Database initialisation failed', err);
-    res.statusCode = 503;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({ error: 'Database unavailable — check DATABASE_URL' }));
-    return;
+    console.error('[api] Startup failed:', err);
+    return fail(res, 503, err.expose ? err.message : `API startup failed: ${err.message}`);
   }
   return app(req, res);
 }
