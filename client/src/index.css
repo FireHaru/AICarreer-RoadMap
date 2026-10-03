@@ -1,0 +1,121 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-navy-950: #050914;
+  --color-navy-900: #080d1d;
+  --color-navy-850: #0b1226;
+  --color-navy-800: #0f1730;
+  --color-navy-700: #172140;
+  --color-navy-600: #22305a;
+
+  --animate-pulse-ring: pulse-ring 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-fade-up: fade-up 0.5s ease-out both;
+
+  @keyframes pulse-ring {
+    0%, 100% { box-shadow: 0 0 0 0 rgb(34 211 238 / 0.35); }
+    50% { box-shadow: 0 0 0 8px rgb(34 211 238 / 0); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+  html, body, #root {
+    min-height: 100%;
+  }
+  body {
+    @apply bg-navy-950 font-sans text-slate-100 antialiased;
+    background-image:
+      radial-gradient(60rem 40rem at 10% -10%, rgb(34 211 238 / 0.08), transparent 60%),
+      radial-gradient(50rem 40rem at 100% 0%, rgb(139 92 246 / 0.10), transparent 60%);
+    background-attachment: fixed;
+  }
+  ::selection {
+    background: rgb(34 211 238 / 0.3);
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(255 255 255 / 0.12) transparent;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-white/[0.07] bg-white/[0.03] backdrop-blur-xl;
+  }
+  .card-interactive {
+    @apply rounded-2xl border border-white/[0.07] bg-white/[0.03] backdrop-blur-xl transition-colors hover:border-white/15 hover:bg-white/[0.05];
+  }
+  .input {
+    @apply h-10 w-full rounded-xl border border-white/10 bg-navy-900/70 px-3 text-sm text-slate-100 placeholder:text-slate-500 transition outline-none focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/20;
+  }
+  .label {
+    @apply mb-1.5 block text-xs font-medium tracking-wide text-slate-400;
+  }
+  .eyebrow {
+    @apply text-[11px] font-semibold tracking-[0.14em] text-slate-500 uppercase;
+  }
+  .text-gradient {
+    @apply bg-linear-to-r from-cyan-300 via-sky-300 to-violet-400 bg-clip-text text-transparent;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-0.5 text-xs text-slate-300;
+  }
+}
+
+/* React Flow: blend into the dark navy surface */
+.react-flow {
+  --xy-background-color: transparent;
+  --xy-node-background-color: transparent;
+  --xy-node-border: none;
+  --xy-node-boxshadow-hover: none;
+  --xy-node-boxshadow-selected: none;
+  --xy-controls-button-background-color: rgb(15 23 48 / 0.9);
+  --xy-controls-button-background-color-hover: rgb(34 48 90 / 0.9);
+  --xy-controls-button-color: #cbd5e1;
+  --xy-controls-button-border-color: rgb(255 255 255 / 0.08);
+  --xy-minimap-background-color: rgb(8 13 29 / 0.85);
+  --xy-attribution-background-color: transparent;
+}
+.react-flow__node {
+  padding: 0;
+  border-radius: 1rem;
+}
+.react-flow__controls {
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  box-shadow: none;
+}
+.react-flow__minimap {
+  border-radius: 0.75rem;
+  border: 1px solid rgb(255 255 255 / 0.08);
+}
+.react-flow__attribution {
+  display: none;
+}
+
+/* Landing hero roadmap animation */
+@keyframes dash-flow {
+  to { stroke-dashoffset: -24; }
+}
+.flow-line {
+  stroke-dasharray: 6 6;
+  animation: dash-flow 1.2s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .flow-line, .animate-float, .animate-pulse-ring { animation: none !important; }
+}
