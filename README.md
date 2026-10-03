@@ -45,6 +45,28 @@ Copy `server/.env.example` to `server/.env`.
 | `AI_PROVIDER`, `GEMINI_API_KEY` / `OPENAI_API_KEY` | Let Gemini or OpenAI phrase PathGPT's answers. Without a key, PathGPT uses its built-in reasoning engine. Models: `GEMINI_MODEL` (default `gemini-2.5-flash`), `OPENAI_MODEL` (default `gpt-4o-mini`). |
 | `EXPOSE_RESET_TOKEN` | There is no mail service, so outside production the forgot-password response includes the reset link. |
 
+## Deploy to Vercel
+
+The repo is ready for Vercel: `vercel.json` builds both apps, serves `client/dist` as a static SPA and routes `/api/*`
+to one serverless function (`api/index.mjs`) that runs the Express app.
+
+Vercel functions have no persistent disk, so the embedded PGlite database can't be used there — connect a hosted PostgreSQL:
+
+1. **Database** — in the Vercel dashboard open *Storage → Create Database → Neon* (free tier) and connect it to the project,
+   or create one at [neon.tech](https://neon.tech) and copy its **pooled** connection string.
+2. **Project** — *Add New → Project → Import* this GitHub repository. Keep the root directory and leave the framework preset on *Other*
+   (`vercel.json` sets the build).
+3. **Environment variables** (Settings → Environment Variables):
+
+   | Variable | Value |
+   | --- | --- |
+   | `DATABASE_URL` | Postgres connection string (set automatically by the Neon integration) |
+   | `JWT_SECRET` | a long random string — required in production |
+   | `EXPOSE_RESET_TOKEN` | `true` only for a demo without an email service (shows the reset link on screen) |
+   | `GEMINI_API_KEY` / `OPENAI_API_KEY` | optional, for LLM-written PathGPT answers |
+
+4. **Deploy.** The first API request creates the tables and seeds the catalog, Vietnamese translations and demo account.
+
 ## Languages (English / Tiếng Việt)
 
 Use the **EN | VI** toggle in the sidebar, the top bar, the login pages, onboarding, or *Settings → Profile → Language*.

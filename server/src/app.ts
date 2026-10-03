@@ -13,7 +13,8 @@ import { roadmapRouter } from './routes/roadmap.js';
 export function createApp() {
   const app = express();
   app.disable('x-powered-by');
-  app.set('trust proxy', 'loopback');
+  // Behind Vercel's proxy the client IP is in X-Forwarded-For; without this every visitor would share one rate limit.
+  app.set('trust proxy', process.env.VERCEL ? true : 'loopback');
   app.use(cors({ origin: config.clientOrigin }));
   app.use(languageMiddleware);
   app.use(express.json({ limit: '100kb' }));
